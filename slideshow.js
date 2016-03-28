@@ -1,4 +1,4 @@
-var ffmpeg = require("fluent-ffmpeg");
+var ffmpeg = require("fluent-ffmpeg")
 var fs = require("fs")
 var path = require("path")
 var q = require("q")
@@ -13,18 +13,18 @@ var audioTrack = "audio/how_did_i_get_here.mkv"
 var extension = "mkv"
 var numImages = fs.readdirSync("./images").length
 
-var commandLineArguments = process.argv.slice(2);
+var commandLineArguments = process.argv.slice(2)
 commandLineArguments.forEach(function (arg) {
     var args = arg.split("=")
     if (args.length > 1) {
         switch (args[0]) {
             case "-track":
-                audioTrack = args[1];
+                audioTrack = args[1]
                 extension = audioTrack.split(".").pop()
-                break;
+                break
             case "-times":
                 times = JSON.parse(args[1])
-                break;
+                break
         }
     }
 })
@@ -158,7 +158,7 @@ function addAudioTrack(audioTrack) {
         .addOption("-strict")
         .addOption("-2")
         .on("end", function () {
-            console.log("final video with audio has been merged succesfully");
+            console.log("final video with audio has been merged succesfully")
             deferred.resolve("success")
         }).on("error", function (err, stdout, stderr) {
             console.log("failure \n")
