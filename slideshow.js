@@ -2,16 +2,22 @@ var ffmpeg = require("fluent-ffmpeg")
 var fs = require("fs")
 var path = require("path")
 var q = require("q")
+var gm = require('gm');
 
 // command line arguments
 // -track=<path to track> uses extension of of track as final video format
 // -times=[2000,399,123,1234] json array (cannot contain spaces) of times in ms to show each image
+// -imagesPath=<path to image directory> defaults to "images"
+// -scale=960x720 the scale to the final video and what the images will be cropped too
 
 var times = [3622, 139, 163, 302, 18274, 371, 93, 1393, 1231, 1904, 627, 1254, 278, 952, 2276, 1486, 906, 325, 2531, 1230, 279, 906, 998, 325, 163, 464, 464, 2322, 209, 2578, 1300, 302, 859, 2345, 256, 464, 1904, 1997, 581, 1300, 255, 883, 2322, 278, 627, 279, 348, 627, 302, 325, 1858, 325, 278, 581, 952, 395, 278, 302, 1254, 650, 325, 302, 627, 627, 604, 302, 325, 1880, 326, 301, 627, 233, 394, 441, 2555, 418, 162, 2508, 3924, 1161, 2369, 2531, 2438, 209, 1230, 1208, 1091, 882, 511, 1370, 906, 255, 2531, 1300, 302, 859, 1347, 627, 279, 209, 1370, 1161, 1973, 581, 1300, 256, 673, 209, 1788, 116, 8800]
 var videoLimit = 200
 var audioTrack = "audio/how_did_i_get_here.mkv"
 var extension = "mkv"
-var numImages = fs.readdirSync("./images").length
+var imagesPath = "images"
+var scaleWidth = 960
+var scaleHeight = 720
+var imageNames = fs.readdirSync(imagesPath)
 
 var commandLineArguments = process.argv.slice(2)
 commandLineArguments.forEach(function (arg) {
@@ -25,13 +31,41 @@ commandLineArguments.forEach(function (arg) {
             case "-times":
                 times = JSON.parse(args[1])
                 break
+            case "-imagePath":
+                imagesPath = args[1]
+                break
+            case "-scale":
+                scaleWidth = Number(args[1].split("x")[0])
+                scaleHeight = Number(args[1].split("x")[1])
+                break
         }
     }
 })
 
-createVideoStills(times).then(function () {
-    concatenateVideoStills().then(function () {
-        addAudioTrack(audioTrack)
+function modifyImages(names) {
+    var deferred = q.defer()
+    var processed = 0
+    names.forEach(function (imageName, i) {
+        var imagePath = imagesPath + "/" + imageName
+        gm(imagePath).resize(scaleWidth, scaleHeight).write(imagePath, function (err, value) {
+            if (err) {
+                console.log("Error resizing image " + imageName)
+                console.log(err)
+                process.exit()
+            }
+            if (++processed == names.length) {
+                deferred.resolve("success")
+            }
+        })
+    })
+    return deferred.promise
+}
+
+modifyImages(imageNames).then(function () {
+    createVideoStills(times).then(function () {
+        concatenateVideoStills().then(function () {
+            addAudioTrack(audioTrack)
+        })
     })
 })
 
@@ -56,9 +90,9 @@ function createVideoStills(times) {
                         time += "0"
                     }
                     time = seconds + "." + time + milliseconds
-                    var imageName = "./images/" + (Math.floor(Math.random() * (numImages - 1) + 1)) + ".jpg"
+                    var imageName = imagesPath + "/" + (Math.floor(Math.random() * (imageNames.length - 1) + 1)) + ".jpg"
                     while (imageName == lastImageName) {
-                        imageName = "./images/" + (Math.floor(Math.random() * (numImages - 1) + 1)) + ".jpg"
+                        imageName = imagesPath + "/" + (Math.floor(Math.random() * (imageNames.length - 1) + 1)) + ".jpg"
                     }
                     lastImageName = imageName
                     var destination = "./temp/" + (i + "") + "." + (j + "") + "." + extension
@@ -84,10 +118,8 @@ function createVideoStills(times) {
                 console.log("ffmpeg stdout:\n" + stdout)
                 console.log("ffmpeg stderr:\n" + stderr)
                 deferred.reject("error")
-            }).addOption("-vf", "scale=960x720,setsar=1:1")
+            }).addOption("-vf", "scale=" + scaleWidth + "x" + scaleHeight + ",setsar=1:1")
                 .noAudio()
-                //.size("960x720")
-                //.aspect("9:16")
                 .save(destination)
         }
     }
