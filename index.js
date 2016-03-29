@@ -24,8 +24,9 @@ app.post('/generate-slideshow', (req, res) => {
 
     getAllPhotoUrls().then(function (urls) {
         downloadPhotos(urls).then(function () {
-            makeSlideShow()
-            uploadVideo()
+            makeSlideShow().then(function () {
+                uploadVideo()
+            })
         })
     })
 
@@ -60,10 +61,13 @@ function downloadPhotos(urls) {
         var file = fs.createWriteStream("./images/" + (i + 1) + ".jpg")
         https.get(url, function (response) {
             if (response.statusCode == 200) {
-                response.pipe(file)
-                if (++processed == urls.length) {
-                    deferred.resolve("success")
-                }
+                response.pipe(file).on('finish', function () {
+                    if (++processed == urls.length) {
+                        deferred.resolve("success")
+                    }
+                }).on('error', function () {
+                    deferred.reject("error")
+                })
             } else {
                 console.log("ERROR")
                 return deferred.reject("ERROR")
@@ -87,13 +91,15 @@ function getAllPhotoUrls() {
 
 function getPhotoUrls(type) {
     var deferred = q.defer(), processed = 0, photoUrls = []
-    FB.api('me/photos/' + type + '?fields=picture', 'get', {}, function (res) {
+    FB.api('me/photos/' + type + '?fields=picture,images', 'get', {}, function (res) {
         if (!res || res.error) {
             return deferred.reject(res ? res.error : "ERROR")
         }
         if (res.data) {
             res.data.forEach(function (photo) {
-                photoUrls.push(photo.picture)
+                if (photo.images.length > 0) {
+                    photoUrls.push(photo.images[0].source)
+                }
             })
             deferred.resolve(photoUrls)
         }

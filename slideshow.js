@@ -47,13 +47,17 @@ commandLineArguments.forEach(function (arg) {
 
 
 function makeSlideShow() {
+    var deferred = q.defer()
     modifyImages(imageNames).then(function () {
         createVideoStills(times).then(function () {
             concatenateVideoStills().then(function () {
-                addAudioTrack(audioTrack)
+                addAudioTrack(audioTrack).then(function () {
+                    deferred.resolve("success")
+                })
             })
         })
     })
+    return deferred.promise
 }
 
 if (run) {
