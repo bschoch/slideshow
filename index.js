@@ -1,10 +1,11 @@
 var express = require('express')
 var bodyParser = require('body-parser')
-var FB = require('fb')
+var facebook = require('facebook-node-sdk')
 var q = require("q")
 var https = require('https')
 var fs = require('fs')
 var path = require('path')
+var request = require('request')
 var execSync = require('child_process').execSync;
 var makeSlideShow = require('./slideshow.js').makeSlideShow
 
@@ -15,9 +16,10 @@ var serverSettings = {
 var app = express()
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true}))
-
+app.use(express.static(__dirname));
 
 app.set('port', (serverSettings.port))
+var FB = new facebook({fileUpload: true})
 
 app.post('/generate-slideshow', (req, res) => {
     FB.setAccessToken(req.body.token)
@@ -40,16 +42,20 @@ app.listen(serverSettings.port, () => {
 function uploadVideo() {
     var deferred = q.defer()
     FB.api("/me/videos", 'post', {
-        source: '@' + "./output.mkv",
-        title: "Your Life",
-        description: "Amazing!"
-    }, function (res, data) {
-        if (!res || res.error) {
-            deferred.reject(res ? res.error : "Error")
+        source: '@' + __dirname + "/output.mkv",
+        title: "my video",
+        description: "awesome video, all my friends need to see it"
+    }, function (res) {
+
+        if (res.statusCode != 200) {
+            console.log(res.body)
+            deferred.reject("error")
             return
         }
+
         deferred.resolve("success")
     })
+
     return deferred.promise
 }
 
@@ -108,20 +114,22 @@ function getPhotoUrls(type) {
 }
 
 function rmdir(dir) {
-    var list = fs.readdirSync(dir)
-    for (var i = 0; i < list.length; i++) {
-        var filename = path.join(dir, list[i])
-        var stat = fs.statSync(filename)
+    if (fs.existsSync(dir)) {
+        var list = fs.readdirSync(dir)
+        for (var i = 0; i < list.length; i++) {
+            var filename = path.join(dir, list[i])
+            var stat = fs.statSync(filename)
 
-        if (filename == "." || filename == "..") {
-            // pass these files
-        } else if (stat.isDirectory()) {
-            // rmdir recursively
-            rmdir(filename)
-        } else {
-            // rm fiilename
-            fs.unlinkSync(filename)
+            if (filename == "." || filename == "..") {
+                // pass these files
+            } else if (stat.isDirectory()) {
+                // rmdir recursively
+                rmdir(filename)
+            } else {
+                // rm fiilename
+                fs.unlinkSync(filename)
+            }
         }
+        fs.rmdirSync(dir)
     }
-    fs.rmdirSync(dir)
 }
