@@ -47,16 +47,35 @@ function modifyImages(names) {
     var processed = 0
     names.forEach(function (imageName, i) {
         var imagePath = imagesPath + "/" + imageName
-        gm(imagePath).resize(scaleWidth, scaleHeight).write(imagePath, function (err, value) {
+        gm(imagePath).size(function(err, size) {
             if (err) {
-                console.log("Error resizing image " + imageName)
+                console.log("Error getting image size " + imageName)
                 console.log(err)
                 process.exit()
             }
-            if (++processed == names.length) {
-                deferred.resolve("success")
+            var xRatio = size.width / scaleWidth
+            var yRatio = size.height / scaleHeight
+            var xOffset, yOffset
+            xOffset = yOffset = 0
+            var img
+            if (xRatio < yRatio) {
+                img = gm(imagePath).resize(null, scaleHeight)
+            } else {
+                img = gm(imagePath).resize(scaleWidth)
             }
+
+            img.crop(scaleWidth, scaleHeight, xOffset, yOffset).write(imagePath, function (err, value) {
+                if (err) {
+                    console.log("Error resizing image " + imageName)
+                    console.log(err)
+                    process.exit()
+                }
+                if (++processed == names.length) {
+                    deferred.resolve("success")
+                }
+            })
         })
+
     })
     return deferred.promise
 }
