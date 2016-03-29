@@ -73,7 +73,7 @@ function modifyImages(names) {
             if (err) {
                 console.log("Error getting image size " + imageName)
                 console.log(err)
-                process.exit(-1)
+                return deferred.reject(err)
             }
             var xRatio = size.width / scaleWidth
             var yRatio = size.height / scaleHeight
@@ -90,7 +90,7 @@ function modifyImages(names) {
                 if (err) {
                     console.log("Error resizing image " + imageName)
                     console.log(err)
-                    process.exit(-1)
+                    return deferred.reject(err)
                 }
                 if (++processed == names.length) {
                     deferred.resolve("success")
@@ -150,7 +150,7 @@ function createVideoStills(times) {
                 console.log("ffmpeg err:\n" + err)
                 console.log("ffmpeg stdout:\n" + stdout)
                 console.log("ffmpeg stderr:\n" + stderr)
-                process.exit(-1)
+                return deferred.reject(err)
             }).addOption("-vf", "scale=" + scaleWidth + "x" + scaleHeight + ",setsar=1:1")
                 .noAudio()
                 .save(destination)
@@ -188,7 +188,7 @@ function concatenateVideoStills() {
                 console.log("ffmpeg err:\n" + err)
                 console.log("ffmpeg stdout:\n" + stdout)
                 console.log("ffmpeg stderr:\n" + stderr)
-                process.exit(-1)
+                return deferred.reject(err)
             }).mergeToFile("./temp/conc" + i + "." + extension)
         }
     }
@@ -210,7 +210,7 @@ function concatenateFinalVideo() {
         console.log("ffmpeg err:\n" + err)
         console.log("ffmpeg stdout:\n" + stdout)
         console.log("ffmpeg stderr:\n" + stderr)
-        process.exit(-1)
+        return deferred.reject(err)
     }).mergeToFile("./temp/conc" + "." + extension)
     return deferred.promise
 }
@@ -230,7 +230,7 @@ function addAudioTrack(audioTrack) {
             console.log("ffmpeg err:\n" + err)
             console.log("ffmpeg stdout:\n" + stdout)
             console.log("ffmpeg stderr:\n" + stderr)
-            process.exit(-1)
+            return deferred.reject(err)
         }).save("./output" + "." + extension)
     return deferred.promise
 }

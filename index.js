@@ -25,6 +25,7 @@ app.post('/generate-slideshow', (req, res) => {
     getAllPhotoUrls().then(function (urls) {
         downloadPhotos(urls).then(function () {
             makeSlideShow()
+            uploadVideo()
         })
     })
 
@@ -34,6 +35,22 @@ app.post('/generate-slideshow', (req, res) => {
 app.listen(serverSettings.port, () => {
     console.log(`Server listening on port ${serverSettings.port}`)
 })
+
+function uploadVideo() {
+    var deferred = q.defer()
+    FB.api("/me/videos", 'post', {
+        source: '@' + "./output.mkv",
+        title: "Your Life",
+        description: "Amazing!"
+    }, function (res, data) {
+        if (!res || res.error) {
+            deferred.reject(res ? res.error : "Error")
+            return
+        }
+        deferred.resolve("success")
+    })
+    return deferred.promise
+}
 
 function downloadPhotos(urls) {
     rmdir("./images")
@@ -49,7 +66,7 @@ function downloadPhotos(urls) {
                 }
             } else {
                 console.log("ERROR")
-                process.exit(-1)
+                return deferred.reject("ERROR")
             }
         })
     })
@@ -72,7 +89,7 @@ function getPhotoUrls(type) {
     var deferred = q.defer(), processed = 0, photoUrls = []
     FB.api('me/photos/' + type + '?fields=picture', 'get', {}, function (res) {
         if (!res || res.error) {
-            process.exit()
+            return deferred.reject(res ? res.error : "ERROR")
         }
         if (res.data) {
             res.data.forEach(function (photo) {
