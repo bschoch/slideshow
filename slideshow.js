@@ -20,6 +20,7 @@ var scaleHeight = 720
 var imageNames = fs.readdirSync(imagesPath)
 
 var commandLineArguments = process.argv.slice(2)
+var run = false
 commandLineArguments.forEach(function (arg) {
     var args = arg.split("=")
     if (args.length > 1) {
@@ -38,20 +39,41 @@ commandLineArguments.forEach(function (arg) {
                 scaleWidth = Number(args[1].split("x")[0])
                 scaleHeight = Number(args[1].split("x")[1])
                 break
+            default:
+                run = true;
         }
     }
 })
+
+
+function makeSlideShow() {
+    modifyImages(imageNames).then(function () {
+        createVideoStills(times).then(function () {
+            concatenateVideoStills().then(function () {
+                addAudioTrack(audioTrack)
+            })
+        })
+    })
+}
+
+if (run) {
+    makeSlideShow()
+}
+
+if (exports) {
+    exports.makeSlideShow = makeSlideShow
+}
 
 function modifyImages(names) {
     var deferred = q.defer()
     var processed = 0
     names.forEach(function (imageName, i) {
         var imagePath = imagesPath + "/" + imageName
-        gm(imagePath).size(function(err, size) {
+        gm(imagePath).size(function (err, size) {
             if (err) {
                 console.log("Error getting image size " + imageName)
                 console.log(err)
-                process.exit()
+                process.exit(-1)
             }
             var xRatio = size.width / scaleWidth
             var yRatio = size.height / scaleHeight
@@ -68,7 +90,7 @@ function modifyImages(names) {
                 if (err) {
                     console.log("Error resizing image " + imageName)
                     console.log(err)
-                    process.exit()
+                    process.exit(-1)
                 }
                 if (++processed == names.length) {
                     deferred.resolve("success")
@@ -79,14 +101,6 @@ function modifyImages(names) {
     })
     return deferred.promise
 }
-
-modifyImages(imageNames).then(function () {
-    createVideoStills(times).then(function () {
-        concatenateVideoStills().then(function () {
-            addAudioTrack(audioTrack)
-        })
-    })
-})
 
 function createVideoStills(times) {
     var deferred = q.defer()
@@ -136,7 +150,7 @@ function createVideoStills(times) {
                 console.log("ffmpeg err:\n" + err)
                 console.log("ffmpeg stdout:\n" + stdout)
                 console.log("ffmpeg stderr:\n" + stderr)
-                deferred.reject("error")
+                process.exit(-1)
             }).addOption("-vf", "scale=" + scaleWidth + "x" + scaleHeight + ",setsar=1:1")
                 .noAudio()
                 .save(destination)
@@ -174,7 +188,7 @@ function concatenateVideoStills() {
                 console.log("ffmpeg err:\n" + err)
                 console.log("ffmpeg stdout:\n" + stdout)
                 console.log("ffmpeg stderr:\n" + stderr)
-                deferred.reject("error")
+                process.exit(-1)
             }).mergeToFile("./temp/conc" + i + "." + extension)
         }
     }
@@ -196,7 +210,7 @@ function concatenateFinalVideo() {
         console.log("ffmpeg err:\n" + err)
         console.log("ffmpeg stdout:\n" + stdout)
         console.log("ffmpeg stderr:\n" + stderr)
-        deferred.reject("error")
+        process.exit(-1)
     }).mergeToFile("./temp/conc" + "." + extension)
     return deferred.promise
 }
@@ -216,7 +230,7 @@ function addAudioTrack(audioTrack) {
             console.log("ffmpeg err:\n" + err)
             console.log("ffmpeg stdout:\n" + stdout)
             console.log("ffmpeg stderr:\n" + stderr)
-            deferred.reject("error")
+            process.exit(-1)
         }).save("./output" + "." + extension)
     return deferred.promise
 }
