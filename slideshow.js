@@ -63,16 +63,27 @@ function modifyImages(names) {
                 console.log(err)
                 return deferred.reject(err)
             }
-            var xRatio = size.width / scaleWidth
-            var yRatio = size.height / scaleHeight
+            var scaleX = true
+            var xRatio = scaleWidth / size.width
+            var yRatio = scaleHeight / size.height
+
+            if (size.height < scaleHeight && size.width >= scaleWidth) {
+                scaleX = false
+            } else if (size.width >= scaleWidth || size.height < scaleHeight) {
+                if (yRatio > xRatio) {
+                    scaleX = false
+                }
+            }
+
+            if (scaleX) {
+                img = gm(imagePath).resize(scaleWidth)
+            } else {
+                img = gm(imagePath).resize(null, scaleHeight)
+            }
+
             var xOffset, yOffset
             xOffset = yOffset = 0
             var img
-            if (size.height > size.width && xRatio > yRatio || size.height < size.width && yRatio > xRatio) {
-                img = gm(imagePath).resize(null, scaleHeight)
-            } else {
-                img = gm(imagePath).resize(scaleWidth)
-            }
 
             img.crop(scaleWidth, scaleHeight, xOffset, yOffset).write(imagePath, function (err, value) {
                 if (err) {
