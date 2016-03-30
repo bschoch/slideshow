@@ -68,7 +68,7 @@ function modifyImages(names) {
             var xOffset, yOffset
             xOffset = yOffset = 0
             var img
-            if (xRatio < yRatio) {
+            if (size.height > size.width && xRatio > yRatio || size.height < size.width && yRatio > xRatio) {
                 img = gm(imagePath).resize(null, scaleHeight)
             } else {
                 img = gm(imagePath).resize(scaleWidth)
