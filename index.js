@@ -1,6 +1,7 @@
 var express = require('express')
 var bodyParser = require('body-parser')
 var FB = require('fb')
+var facebook = require('facebook-node-sdk')
 var q = require("q")
 var https = require('https')
 var fs = require('fs')
@@ -18,9 +19,11 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true}))
 app.use(express.static(__dirname));
 
+var FBpost = new facebook({fileUpload: true})
 app.set('port', (serverSettings.port))
 app.post('/generate-slideshow', (req, res) => {
     FB.setAccessToken(req.body.token)
+    FBpost.setAccessToken(req.body.token)
     var options = {}
     getAllPhotoUrls().then(function (urls) {
         downloadPhotos(urls).then(function () {
@@ -42,18 +45,15 @@ app.listen(serverSettings.port, () => {
 
 function uploadVideo() {
     var deferred = q.defer()
-    FB.api("/me/videos", 'post', {
+    FBpost.api("/me/videos", 'post', {
         source: '@' + __dirname + "/output.mkv",
         title: "my video",
         description: "awesome video, all my friends need to see it"
     }, function (res) {
-
-        if (!res || res.error) {
-            console.log(res.body)
-            deferred.reject(!res ? "ERROR" : res.error)
+        if (res && res.error || res * res.statusCode && res.statusCode !== 200) {
+            deferred.reject("ERROR")
             return
         }
-
         deferred.resolve("success")
     })
 
