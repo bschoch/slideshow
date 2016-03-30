@@ -17,55 +17,39 @@ var extension = "mkv"
 var imagesPath = "images"
 var scaleWidth = 960
 var scaleHeight = 720
-var imageNames = fs.readdirSync(imagesPath)
-
-var commandLineArguments = process.argv.slice(2)
-var run = false
-commandLineArguments.forEach(function (arg) {
-    var args = arg.split("=")
-    if (args.length > 1) {
-        switch (args[0]) {
-            case "-track":
-                audioTrack = args[1]
-                extension = audioTrack.split(".").pop()
-                break
-            case "-times":
-                times = JSON.parse(args[1])
-                break
-            case "-imagePath":
-                imagesPath = args[1]
-                break
-            case "-scale":
-                scaleWidth = Number(args[1].split("x")[0])
-                scaleHeight = Number(args[1].split("x")[1])
-                break
-            default:
-                run = true;
+var imageNames = []
+if (exports) {
+    exports.create = function (options) {
+        if (options.track) {
+            audioTrack = options.track
+            extension = audioTrack.split(".").pop()
         }
-    }
-})
-
-
-function makeSlideShow() {
-    var deferred = q.defer()
-    modifyImages(imageNames).then(function () {
-        createVideoStills(times).then(function () {
-            concatenateVideoStills().then(function () {
-                addAudioTrack(audioTrack).then(function () {
-                    deferred.resolve("success")
+        if (options.times) {
+            times = options.times
+        }
+        if (options.imagePath) {
+            imagePath = options.imagePath
+        }
+        if (options.scale) {
+            scaleWidth = Number(options.scale.split("x")[0])
+            scaleHeight = Number(options.scale.split("x")[1])
+        }
+        if (!fs.existsSync(imagesPath)) {
+            fs.mkdirSync(imagesPath)
+        }
+        imageNames = fs.readdirSync(imagesPath)
+        var deferred = q.defer()
+        modifyImages(imageNames).then(function () {
+            createVideoStills(times).then(function () {
+                concatenateVideoStills().then(function () {
+                    addAudioTrack(audioTrack).then(function () {
+                        deferred.resolve("success")
+                    })
                 })
             })
         })
-    })
-    return deferred.promise
-}
-
-if (run) {
-    makeSlideShow()
-}
-
-if (exports) {
-    exports.makeSlideShow = makeSlideShow
+        return deferred.promise
+    }
 }
 
 function modifyImages(names) {
@@ -239,21 +223,24 @@ function addAudioTrack(audioTrack) {
     return deferred.promise
 }
 
+exports.rmdir = rmdir
 function rmdir(dir) {
-    var list = fs.readdirSync(dir)
-    for (var i = 0; i < list.length; i++) {
-        var filename = path.join(dir, list[i])
-        var stat = fs.statSync(filename)
+    if (fs.existsSync(dir)) {
+        var list = fs.readdirSync(dir)
+        for (var i = 0; i < list.length; i++) {
+            var filename = path.join(dir, list[i])
+            var stat = fs.statSync(filename)
 
-        if (filename == "." || filename == "..") {
-            // pass these files
-        } else if (stat.isDirectory()) {
-            // rmdir recursively
-            rmdir(filename)
-        } else {
-            // rm fiilename
-            fs.unlinkSync(filename)
+            if (filename == "." || filename == "..") {
+                // pass these files
+            } else if (stat.isDirectory()) {
+                // rmdir recursively
+                rmdir(filename)
+            } else {
+                // rm fiilename
+                fs.unlinkSync(filename)
+            }
         }
+        fs.rmdirSync(dir)
     }
-    fs.rmdirSync(dir)
 }

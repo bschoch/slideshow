@@ -1,13 +1,13 @@
 var express = require('express')
 var bodyParser = require('body-parser')
-var facebook = require('facebook-node-sdk')
+var FB = require('fb')
 var q = require("q")
 var https = require('https')
 var fs = require('fs')
 var path = require('path')
 var request = require('request')
 var execSync = require('child_process').execSync;
-var makeSlideShow = require('./slideshow.js').makeSlideShow
+var slideshow = require('./slideshow.js')
 
 var serverSettings = {
     port: process.env.PORT || 3000
@@ -19,17 +19,18 @@ app.use(bodyParser.urlencoded({extended: true}))
 app.use(express.static(__dirname));
 
 app.set('port', (serverSettings.port))
-var FB = new facebook({fileUpload: true})
-
 app.post('/generate-slideshow', (req, res) => {
     FB.setAccessToken(req.body.token)
-
+    var options = {}
     getAllPhotoUrls().then(function (urls) {
         downloadPhotos(urls).then(function () {
-            makeSlideShow().then(function () {
+            slideshow.create(options).then(function () {
                 uploadVideo()
             })
         })
+    }).fail(function (err) {
+        console.log("slideshow failed")
+        console.log(err)
     })
 
     res.status(200).send()
@@ -47,9 +48,9 @@ function uploadVideo() {
         description: "awesome video, all my friends need to see it"
     }, function (res) {
 
-        if (res.statusCode != 200) {
+        if (!res || res.error) {
             console.log(res.body)
-            deferred.reject("error")
+            deferred.reject(!res ? "ERROR" : res.error)
             return
         }
 
@@ -60,7 +61,7 @@ function uploadVideo() {
 }
 
 function downloadPhotos(urls) {
-    rmdir("./images")
+    slideshow.rmdir("./images")
     fs.mkdirSync("./images")
     var deferred = q.defer(), processed = 0
     urls.forEach(function (url, i) {
@@ -99,7 +100,7 @@ function getPhotoUrls(type) {
     var deferred = q.defer(), processed = 0, photoUrls = []
     FB.api('me/photos/' + type + '?fields=picture,images', 'get', {}, function (res) {
         if (!res || res.error) {
-            return deferred.reject(res ? res.error : "ERROR")
+            return deferred.reject(!res ? "ERROR" : res.error)
         }
         if (res.data) {
             res.data.forEach(function (photo) {
@@ -111,25 +112,4 @@ function getPhotoUrls(type) {
         }
     })
     return deferred.promise
-}
-
-function rmdir(dir) {
-    if (fs.existsSync(dir)) {
-        var list = fs.readdirSync(dir)
-        for (var i = 0; i < list.length; i++) {
-            var filename = path.join(dir, list[i])
-            var stat = fs.statSync(filename)
-
-            if (filename == "." || filename == "..") {
-                // pass these files
-            } else if (stat.isDirectory()) {
-                // rmdir recursively
-                rmdir(filename)
-            } else {
-                // rm fiilename
-                fs.unlinkSync(filename)
-            }
-        }
-        fs.rmdirSync(dir)
-    }
 }

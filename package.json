@@ -9,7 +9,7 @@
   "dependencies": {
     "body-parser": "^1.15.0",
     "express": "4.13.3",
-    "fb": "^1.0.2",
+    "fb": "^1.1.0-alpha1",
     "fluent-ffmpeg": "^2.0.1",
     "q": "^1.4.1"
   },
