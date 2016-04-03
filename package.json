@@ -1,11 +1,8 @@
 {
-  "name": "visaudio-api",
+  "name": "slideshow",
   "version": "0.1.0",
-  "description": "An API for turning your photos into videos",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js"
-  },
+  "description": "An module for turning your photos into videos at variable intervals",
+  "main": "slideshow.js",
   "dependencies": {
     "body-parser": "^1.15.0",
     "express": "4.13.3",

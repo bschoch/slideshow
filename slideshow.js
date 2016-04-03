@@ -1,14 +1,9 @@
 var ffmpeg = require("fluent-ffmpeg")
 var fs = require("fs")
-var path = require("path")
 var q = require("q")
-var gm = require('gm');
-
-// command line arguments
-// -track=<path to track> uses extension of of track as final video format
-// -times=[2000,399,123,1234] json array (cannot contain spaces) of times in ms to show each image
-// -imagesPath=<path to image directory> defaults to "images"
-// -scale=960x720 the scale to the final video and what the images will be cropped too
+var gm = require('gm')
+var facebook = require('./facebook.js')
+var utilities = require('./utilities.js')
 
 var times = [3622, 139, 163, 302, 18274, 371, 93, 1393, 1231, 1904, 627, 1254, 278, 952, 2276, 1486, 906, 325, 2531, 1230, 279, 906, 998, 325, 163, 464, 464, 2322, 209, 2578, 1300, 302, 859, 2345, 256, 464, 1904, 1997, 581, 1300, 255, 883, 2322, 278, 627, 279, 348, 627, 302, 325, 1858, 325, 278, 581, 952, 395, 278, 302, 1254, 650, 325, 302, 627, 627, 604, 302, 325, 1880, 326, 301, 627, 233, 394, 441, 2555, 418, 162, 2508, 3924, 1161, 2369, 2531, 2438, 209, 1230, 1208, 1091, 882, 511, 1370, 906, 255, 2531, 1300, 302, 859, 1347, 627, 279, 209, 1370, 1161, 1973, 581, 1300, 256, 673, 209, 1788, 116, 8800]
 var videoLimit = 200
@@ -18,38 +13,49 @@ var imagesPath = "images"
 var scaleWidth = 960
 var scaleHeight = 720
 var imageNames = []
-if (exports) {
-    exports.create = function (options) {
-        if (options.track) {
-            audioTrack = options.track
-            extension = audioTrack.split(".").pop()
-        }
-        if (options.times) {
-            times = options.times
-        }
-        if (options.imagePath) {
-            imagePath = options.imagePath
-        }
-        if (options.scale) {
-            scaleWidth = Number(options.scale.split("x")[0])
-            scaleHeight = Number(options.scale.split("x")[1])
-        }
-        if (!fs.existsSync(imagesPath)) {
-            fs.mkdirSync(imagesPath)
-        }
-        imageNames = fs.readdirSync(imagesPath)
-        var deferred = q.defer()
-        modifyImages(imageNames).then(function () {
-            createVideoStills(times).then(function () {
-                concatenateVideoStills().then(function () {
-                    addAudioTrack(audioTrack).then(function () {
-                        deferred.resolve("success")
-                    })
+
+// options
+// track <path to track> uses extension of of track as final video format
+// times [2000,399,123,1234] json array (cannot contain spaces) of times in ms to show each image
+// imagesPath <path to image directory> defaults to "images"
+// scale 960x720 the scale to the final video and what the images will be cropped too
+
+exports.create = function (options) {
+    if (options.track) {
+        audioTrack = options.track
+        extension = audioTrack.split(".").pop()
+    }
+    if (options.times) {
+        times = options.times
+    }
+    if (options.imagePath) {
+        imagePath = options.imagePath
+    }
+    if (options.scale) {
+        scaleWidth = Number(options.scale.split("x")[0])
+        scaleHeight = Number(options.scale.split("x")[1])
+    }
+
+    if (!fs.existsSync(imagesPath)) {
+        fs.mkdirSync(imagesPath)
+    }
+
+    var deferred = q.defer()
+    imageNames = fs.readdirSync(imagesPath)
+    modifyImages(imageNames).then(function () {
+        createVideoStills(times).then(function () {
+            concatenateVideoStills().then(function () {
+                addAudioTrack(audioTrack).then(function () {
+                    deferred.resolve("success")
                 })
             })
         })
-        return deferred.promise
-    }
+    }).fail(function (err) {
+        console.log(err)
+        deferred.reject("fail")
+    })
+
+    return deferred.promise
 }
 
 function modifyImages(names) {
@@ -104,7 +110,7 @@ function modifyImages(names) {
 function createVideoStills(times) {
     var deferred = q.defer()
     var batches = 0
-    rmdir("./temp")
+    utilities.rmdir("./temp")
     fs.mkdirSync("./temp")
     batchVideos(0, "")
     return deferred.promise
@@ -232,26 +238,4 @@ function addAudioTrack(audioTrack) {
             return deferred.reject(err)
         }).save("./output" + "." + extension)
     return deferred.promise
-}
-
-exports.rmdir = rmdir
-function rmdir(dir) {
-    if (fs.existsSync(dir)) {
-        var list = fs.readdirSync(dir)
-        for (var i = 0; i < list.length; i++) {
-            var filename = path.join(dir, list[i])
-            var stat = fs.statSync(filename)
-
-            if (filename == "." || filename == "..") {
-                // pass these files
-            } else if (stat.isDirectory()) {
-                // rmdir recursively
-                rmdir(filename)
-            } else {
-                // rm fiilename
-                fs.unlinkSync(filename)
-            }
-        }
-        fs.rmdirSync(dir)
-    }
 }
