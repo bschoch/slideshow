@@ -8,7 +8,7 @@
     "express": "4.13.3",
     "facebook-node-sdk": "^0.2.0",
     "fb": "^1.1.0-alpha1",
-    "fluent-ffmpeg": "^2.0.1",
+    "fluent-ffmpeg": "fluent-ffmpeg/node-fluent-ffmpeg",
     "gm": "^1.21.1",
     "q": "^1.4.1"
   },
