@@ -16,7 +16,7 @@ var imageNames = []
 
 // options
 // track <path to track> uses extension of of track as final video format
-// times [2000,399,123,1234] json array (cannot contain spaces) of times in ms to show each image
+// times [2000, 399, 123, 1234] json array of times in ms to show each image
 // imagesPath <path to image directory> defaults to "images"
 // scale 960x720 the scale to the final video and what the images will be cropped too
 

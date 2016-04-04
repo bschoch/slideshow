@@ -29,12 +29,12 @@ function uploadVideo(options) {
     options.outputFile = options.outputFile || "output.mkv"
     var deferred = q.defer()
     FBpost.api("/me/videos", 'post', {
-        source: '@' + __dirname + "/" + options.outputFile,
+        source: '@' + "./" + options.outputFile,
         title: "my video",
         description: "awesome video, all my friends need to see it"
     }, function (res) {
-        if (res && (res.error || res.statusCode && res.statusCode !== 200)) {
-            deferred.reject("ERROR")
+        if (res && res.code) {
+            deferred.reject(res.code + " " + res.message)
             return
         }
         deferred.resolve("success")
