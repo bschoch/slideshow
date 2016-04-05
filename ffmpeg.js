@@ -6,15 +6,15 @@ exports.imageToVideo = imageToVideo
 function imageToVideo(imagePath, duration, destination, width, height) {
   var deferred = q.defer()
   var command = spawn('ffmpeg', ['-loop', '1', '-i', imagePath, '-y', '-an', '-r', '25', '-t', duration, '-vf', 'scale=' + width + 'x' + height + ',setsar=1:1', destination])
-  var stderr
-  command.stderr.on('data', function (chunk) {
-    if (chunk) {
-      stderr += chunk.toString()
-    }
-  })
-  command.stderr.on('end', function () {
-    //console.log(stderr)
-  })
+  //var stderr
+  //command.stderr.on('data', function (chunk) {
+  //  if (chunk) {
+  //    stderr += chunk.toString()
+  //  }
+  //})
+  //command.stderr.on('end', function () {
+  //  console.log(stderr)
+  //})
   command.on('exit', function (code, signal) {
     if (signal) {
       return deferred.reject(signal)
@@ -37,15 +37,15 @@ function concatenateVideos(videoPaths, destination) {
     args.push(videoPath)
   })
   var command = spawn('ffmpeg', args.concat(['-y', '-filter_complex', 'concat=n=' + videoPaths.length + ':v=1:a=0', destination]))
-  var stderr
-  command.stderr.on('data', function (chunk) {
-    if (chunk) {
-      stderr += chunk.toString()
-    }
-  })
-  command.stderr.on('end', function () {
-    //console.log(stderr)
-  })
+  //var stderr
+  //command.stderr.on('data', function (chunk) {
+  //  if (chunk) {
+  //    stderr += chunk.toString()
+  //  }
+  //})
+  //command.stderr.on('end', function () {
+  //  console.log(stderr)
+  //})
   command.on('exit', function (code, signal) {
     if (signal) {
       return deferred.reject(signal)
@@ -63,15 +63,15 @@ exports.addAudioToVideo = addAudioToVideo
 function addAudioToVideo(videoPath, audioPath, destination) {
   var deferred = q.defer()
   var command = spawn('ffmpeg', ['-i', videoPath, '-i', audioPath, '-y', '-codec', 'copy', '-shortest', '-strict', '-2', destination])
-  var stderr
-  command.stderr.on('data', function (chunk) {
-    if (chunk) {
-      stderr += chunk.toString()
-    }
-  })
-  command.stderr.on('end', function () {
-    //console.log(stderr)
-  })
+  //var stderr
+  //command.stderr.on('data', function (chunk) {
+  //  if (chunk) {
+  //    stderr += chunk.toString()
+  //  }
+  //})
+  //command.stderr.on('end', function () {
+  //  console.log(stderr)
+  //})
   command.on('exit', function (code, signal) {
     if (signal) {
       return deferred.reject(signal)
