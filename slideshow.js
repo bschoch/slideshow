@@ -217,7 +217,7 @@ function addAudioTrack(audioPath) {
     deferred.resolve('success')
   }).fail(function (message) {
     console.log(message)
-    deferred.resolve(failure)
+    deferred.reject('failure')
   })
   return deferred.promise
 }
