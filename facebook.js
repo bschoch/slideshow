@@ -12,8 +12,11 @@ function getPhotos(options) {
     options.imagePath = options.imagePath || "./images"
     FB.setAccessToken(options.token)
     FBpost.setAccessToken(options.token)
+    console.log("get photos begin")
     getAllPhotoUrls().then(function (urls) {
+        console.log("get photos retrieved urls " + urls)
         downloadPhotos(urls, options.imagePath).then(function () {
+            console.log("get photos urls downloaded")
             return deferred.resolve("success")
         })
     }).fail(function (err) {

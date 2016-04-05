@@ -17,7 +17,9 @@ jobs.process('slideshows', function (job, done) {
   var songPath = job.data.songPath;
   console.log("processing token " + job.data.token)
   facebook.getPhotos({token: token}).then(function () {
+    console.log("get photos complete")
     slideshow.create({track: "./audio/" + songPath, times: timesMap[songPath]}).then(function () {
+      console.log("slideshow complete")
       facebook.uploadVideo({outputFile: "output.mp4"}).then(function (data) {
         console.log("success " + job.data.token)
         return done()

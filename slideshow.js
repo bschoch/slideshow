@@ -43,9 +43,13 @@ exports.create = function (options) {
 
   var deferred = q.defer()
   imageNames = fs.readdirSync(imagesPath)
+  console.log("slideshow modifying images")
   modifyImages(imageNames).then(function () {
+    console.log("slideshow creating video stills")
     createVideoStills(times).then(function () {
+      console.log("slideshow concatenating video stills")
       concatenateVideoStills().then(function () {
+        console.log("slideshow adding audio track")
         addAudioTrack(audioTrack).then(function () {
           deferred.resolve('success')
         })
