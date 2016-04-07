@@ -43,15 +43,22 @@ exports.create = function (options) {
   }
 
   var deferred = q.defer()
+  var begin = new Date().getTime()
   imageNames = fs.readdirSync(imagesPath)
+  var begin = new Date().getTime()
   console.log("slideshow modifying images")
   modifyImages(imageNames).then(function () {
-    console.log("slideshow creating video stills")
+    var modifiedImages = new Date().getTime()
+    console.log("slideshow creating video stills " + modifiedImages - begin)
     createVideoStills(times).then(function () {
-      console.log("slideshow concatenating video stills")
+      var createdVideoStills = new Date().getTime()
+      console.log("slideshow concatenating video stills " + createdVideoStills - modifiedImages)
       concatenateVideoStills().then(function () {
-        console.log("slideshow adding audio track")
+        var concatenatedStills = new Date().getTime()
+        console.log("slideshow adding audio track " + concatenatedStills - createdVideoStills)
         addAudioTrack(audioTrack).then(function () {
+          var addAudioTrack = new Date().getTime()
+          console.log("added audio track " + addAudioTrack - concatenatedStills)
           deferred.resolve('success')
         })
       })

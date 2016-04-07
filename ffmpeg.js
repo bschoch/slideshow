@@ -1,7 +1,7 @@
 var spawn = require('child_process').spawn
 var spawnSync = require('child_process').spawnSync
 var q = require('q')
-var sync = true
+var sync = false
 
 exports.imageToVideo = imageToVideo
 
@@ -48,12 +48,23 @@ function call(deferred, args, success) {
       deferred.reject([result.stdout ? result.stdout.toString() : '', result.stderr ? result.stderr.toString() : ''])
     }
   } else {
+    var stdout, stderr
     var command = spawn('ffmpeg', args)
+    if (command.stdout) {
+      command.stdout.on('data', function (data) {
+        stdout += data
+      })
+    }
+    if (command.stderr) {
+      command.stderr.on('data', function (data) {
+        stderr += data
+      })
+    }
     command.on('exit', function (code, signal) {
       if (signal) {
-        return deferred.reject(signal)
-      } else if (code) {
-        return deferred.reject(code)
+        return deferred.reject([stdout, stderr].join('\n'))
+      } else if (code !== 0) {
+        return deferred.reject([stdout, stderr].join('\n'))
       } else {
         return deferred.resolve(success)
       }
