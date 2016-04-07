@@ -20,7 +20,7 @@ jobs.process('slideshows', function (job, done) {
     console.log("get photos complete")
     return slideshow.create({track: "./audio/" + songPath, times: timesMap[songPath]}).then(function () {
       console.log("slideshow complete")
-      return facebook.uploadVideo({outputFile: "output.mp4"}).then(function (data) {
+      return facebook.uploadVideo({outputFile: "output.mp4", token: job.data.token}).then(function (data) {
         console.log("success " + job.data.token)
         return done()
       })

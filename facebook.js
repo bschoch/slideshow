@@ -11,7 +11,6 @@ function getPhotos(options) {
     var deferred = q.defer()
     options.imagePath = options.imagePath || "./images"
     FB.setAccessToken(options.token)
-    FBpost.setAccessToken(options.token)
     console.log("get photos begin")
     getAllPhotoUrls().then(function (urls) {
         console.log("get photos retrieved urls " + urls)
@@ -31,6 +30,7 @@ exports.uploadVideo = uploadVideo
 function uploadVideo(options) {
     options.outputFile = options.outputFile || "output.mkv"
     var deferred = q.defer()
+    FBpost.setAccessToken(options.token)
     FBpost.api("/me/videos", 'post', {
         source: '@' + "./" + options.outputFile,
         title: "my video",
