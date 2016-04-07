@@ -16,11 +16,11 @@ jobs.process('slideshows', function (job, done) {
   var token = job.data.token;
   var songPath = job.data.songPath;
   console.log("processing token " + job.data.token)
-  facebook.getPhotos({token: token}).then(function () {
+  return facebook.getPhotos({token: token}).then(function () {
     console.log("get photos complete")
-    slideshow.create({track: "./audio/" + songPath, times: timesMap[songPath]}).then(function () {
+    return slideshow.create({track: "./audio/" + songPath, times: timesMap[songPath]}).then(function () {
       console.log("slideshow complete")
-      facebook.uploadVideo({outputFile: "output.mp4"}).then(function (data) {
+      return facebook.uploadVideo({outputFile: "output.mp4"}).then(function (data) {
         console.log("success " + job.data.token)
         return done()
       })

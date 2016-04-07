@@ -1,6 +1,7 @@
 var fs = require('fs')
 var q = require('q')
 var gm = require('gm')
+gm = gm.subClass({ imageMagick: true });
 var facebook = require('./facebook.js')
 var utilities = require('./utilities.js')
 var ffmpeg = require('./ffmpeg.js')
