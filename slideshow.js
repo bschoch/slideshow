@@ -43,7 +43,6 @@ exports.create = function (options) {
   }
 
   var deferred = q.defer()
-  var begin = new Date().getTime()
   imageNames = fs.readdirSync(imagesPath)
   var begin = new Date().getTime()
   console.log("slideshow modifying images")
