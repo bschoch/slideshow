@@ -39,6 +39,7 @@ function addAudioToVideo(videoPath, audioPath, destination) {
 }
 
 function call(deferred, args, success) {
+  console.log('ffmpeg ' + args.join(' '))
   if (sync) {
     var result = spawnSync('ffmpeg', args)
     if (result.status === 0) {
