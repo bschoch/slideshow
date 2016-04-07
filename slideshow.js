@@ -48,16 +48,16 @@ exports.create = function (options) {
   console.log("slideshow modifying images")
   modifyImages(imageNames).then(function () {
     var modifiedImages = new Date().getTime()
-    console.log("slideshow creating video stills " + modifiedImages - begin)
+    console.log("slideshow creating video stills " + (modifiedImages - begin))
     createVideoStills(times).then(function () {
       var createdVideoStills = new Date().getTime()
-      console.log("slideshow concatenating video stills " + createdVideoStills - modifiedImages)
+      console.log("slideshow concatenating video stills " + (createdVideoStills - modifiedImages))
       concatenateVideoStills().then(function () {
         var concatenatedStills = new Date().getTime()
-        console.log("slideshow adding audio track " + concatenatedStills - createdVideoStills)
+        console.log("slideshow adding audio track " + (concatenatedStills - createdVideoStills))
         addAudioTrack(audioTrack).then(function () {
           var addAudioTrack = new Date().getTime()
-          console.log("added audio track " + addAudioTrack - concatenatedStills)
+          console.log("added audio track " + (addAudioTrack - concatenatedStills))
           deferred.resolve('success')
         })
       })
