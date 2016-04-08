@@ -32,15 +32,15 @@ function uploadVideo(options) {
     var deferred = q.defer()
     FBpost.setAccessToken(options.token)
     FBpost.api("/me/videos", 'post', {
-        source: '@' + "./" + options.outputFile,
-        title: "my video",
-        description: "awesome video, all my friends need to see it"
-    }, function (res) {
-        if (res && res.code) {
-            deferred.reject(res.code + " " + res.message)
-            return
-        }
-        deferred.resolve("success")
+      source: '@' + './' + options.outputFile,
+      title: "my video",
+      description: "awesome video, all my friends need to see it"
+    }, function (err, res) {
+      if (err) {
+        console.log(err)
+        return deferred.reject(err)
+      }
+      return deferred.resolve(res)
     })
 
     return deferred.promise
