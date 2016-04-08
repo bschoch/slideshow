@@ -16,17 +16,17 @@ jobs.process('slideshows', function (job, done) {
   var token = job.data.token;
   var songPath = job.data.songPath;
   console.log("processing token " + job.data.token)
-  return facebook.getPhotos({token: token}).then(function () {
+  facebook.getPhotos({token: token}).then(function () {
     console.log("get photos complete")
-    return slideshow.create({track: "./audio/" + songPath, times: timesMap[songPath]}).then(function () {
+    slideshow.create({track: "./audio/" + songPath, times: timesMap[songPath]}).then(function () {
       console.log("slideshow complete")
-      return facebook.uploadVideo({outputFile: "output.mp4", token: job.data.token}).then(function (data) {
+      facebook.uploadVideo({outputFile: "output.mp4", token: job.data.token}).then(function (data) {
         console.log("success " + job.data.token)
         return done()
       })
     })
   }).fail(function (err) {
-    console.log("failure " + job.data.token)
-    return done(new Error('slideshow failed ' + err));
+    console.log("failure " + err)
+    return done();
   })
 })

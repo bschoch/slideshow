@@ -31,15 +31,16 @@ function uploadVideo(options) {
     options.outputFile = options.outputFile || "output.mkv"
     var deferred = q.defer()
     FBpost.setAccessToken(options.token)
-    FBpost.api("/me/videos", 'post', {
+    FBpost.api("/me/videos", 'POST', {
       source: '@' + './' + options.outputFile,
-      title: "my video",
-      description: "awesome video, all my friends need to see it"
+      title: "visaudio",
+      description: "http://www.visaudio.me"
     }, function (err, res) {
       if (err) {
         console.log(err)
         return deferred.reject(err)
       }
+      console.log(res)
       return deferred.resolve(res)
     })
 
