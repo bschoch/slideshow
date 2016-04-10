@@ -12,21 +12,26 @@ var timesMap = {
 
 console.log("starting reading from queue")
 jobs.process('slideshows', function (job, done) {
-  var urls = job.data.urls;
-  var token = job.data.token;
-  var songPath = job.data.songPath;
-  console.log("processing token " + job.data.token)
-  facebook.getPhotos({token: token}).then(function () {
-    console.log("get photos complete")
-    slideshow.create({track: "./audio/" + songPath, times: timesMap[songPath]}).then(function () {
-      console.log("slideshow complete")
-      facebook.uploadVideo({outputFile: "output.mp4", token: job.data.token}).then(function (data) {
-        console.log("success " + job.data.token)
-        return done()
+  try {
+    var urls = job.data.urls;
+    var token = job.data.token;
+    var songPath = job.data.songPath;
+    console.log("processing token " + job.data.token)
+    facebook.getPhotos({token: token}).then(function () {
+      console.log("get photos complete")
+      slideshow.create({track: "./audio/" + songPath, times: timesMap[songPath]}).then(function () {
+        console.log("slideshow complete")
+        facebook.uploadVideo({outputFile: "output.mp4", token: job.data.token}).then(function (data) {
+          console.log("success " + job.data.token)
+          return done()
+        })
       })
+    }).fail(function (err) {
+      console.log("HANDLED_ERROR " + err)
+      return done();
     })
-  }).fail(function (err) {
-    console.log("failure " + err)
-    return done();
-  })
+  } catch(err) {
+    console.log("UNHANDLED_ERROR " + err)
+    return done()
+  }
 })
