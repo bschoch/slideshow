@@ -12,6 +12,7 @@ var videoLimit = 200
 var audioTrack = 'audio/Shakey-Graves_Family-and-Genus.mp4'
 var extension = 'mp4'
 var imagesPath = 'images'
+var tempPath = 'temp'
 var scaleWidth = 960
 var scaleHeight = 720
 var imageNames = []
@@ -32,6 +33,9 @@ exports.create = function (options) {
   }
   if (options.imagePath) {
     imagePath = options.imagePath
+  }
+  if (options.tempPath) {
+    tempPath = options.tempPath
   }
   if (options.scale) {
     scaleWidth = Number(options.scale.split('x')[0])
@@ -126,8 +130,8 @@ function modifyImages(names) {
 function createVideoStills(times) {
   var deferred = q.defer()
   var batches = 0
-  utilities.rmdir('./temp')
-  fs.mkdirSync('./temp')
+  utilities.rmdir(tempPath)
+  fs.mkdirSync(tempPath)
   batchVideos(0, '')
   return deferred.promise
 
@@ -149,7 +153,7 @@ function createVideoStills(times) {
             imageName = imagesPath + '/' + (Math.floor(Math.random() * (imageNames.length - 1) + 1)) + '.jpg'
           }
           lastImageName = imageName
-          var destination = './temp/' + (i + '') + '.' + (j + '') + '.' + extension
+          var destination = tempPath + '/' + (i + '') + '.' + (j + '') + '.' + extension
           saveVideo(imageName, time, destination)
         }
       }
@@ -185,10 +189,10 @@ function concatenateVideoStills() {
       var videoPaths = []
       for (var j = 0; j < videoLimit; j += 1) {
         if (i * videoLimit + j < times.length) {
-          videoPaths.push('./temp/' + (i + '') + '.' + (j + '') + '.' + extension)
+          videoPaths.push(tempPath + '/' + (i + '') + '.' + (j + '') + '.' + extension)
         }
       }
-      ffmpeg.concatenateVideos(videoPaths, './temp/conc' + i + '.' + extension).then(function (message) {
+      ffmpeg.concatenateVideos(videoPaths, tempPath + '/conc' + i + '.' + extension).then(function (message) {
         if (++finished == Math.ceil(times.length / videoLimit)) {
           return concatenateFinalVideo().then(function () {
             console.log('successfully merged all video still files')
@@ -209,9 +213,9 @@ function concatenateFinalVideo() {
   var deferred = q.defer()
   var videoPaths = []
   for (var i = 0; i < times.length / videoLimit; i += 1) {
-    videoPaths.push('./temp/conc' + i + '.' + extension)
+    videoPaths.push(tempPath + '/conc' + i + '.' + extension)
   }
-  ffmpeg.concatenateVideos(videoPaths, './temp/conc' + '.' + extension).then(function (message) {
+  ffmpeg.concatenateVideos(videoPaths, tempPath + '/conc' + '.' + extension).then(function (message) {
     console.log(message)
     return deferred.resolve('success')
   }).fail(function (message) {
@@ -223,7 +227,7 @@ function concatenateFinalVideo() {
 
 function addAudioTrack(audioPath) {
   var deferred = q.defer()
-  ffmpeg.addAudioToVideo('./temp/conc' + '.' + extension, audioPath, './output' + '.' + extension).then(function (message) {
+  ffmpeg.addAudioToVideo(tempPath + '/conc' + '.' + extension, audioPath, tempPath + '/output' + '.' + extension).then(function (message) {
     console.log(message)
     deferred.resolve('success')
   }).fail(function (message) {
