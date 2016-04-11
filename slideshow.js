@@ -31,8 +31,8 @@ exports.create = function (options) {
   if (options.times) {
     times = options.times
   }
-  if (options.imagePath) {
-    imagePath = options.imagePath
+  if (options.imagesPath) {
+    imagesPath = options.imagesPath
   }
   if (options.tempPath) {
     tempPath = options.tempPath

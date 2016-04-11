@@ -9,12 +9,12 @@ var FBpost = new facebook({fileUpload: true})
 exports.getPhotos = getPhotos
 function getPhotos(options) {
     var deferred = q.defer()
-    options.imagePath = options.imagePath || "./images"
+    options.imagesPath = options.imagesPath || "./images"
     FB.setAccessToken(options.token)
     console.log("get photos begin")
     getAllPhotoUrls().then(function (urls) {
         console.log("get photos retrieved urls " + urls)
-        downloadPhotos(urls, options.imagePath).then(function () {
+        downloadPhotos(urls, options.imagesPath).then(function () {
             console.log("get photos urls downloaded")
             return deferred.resolve("success")
         })

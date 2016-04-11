@@ -11,7 +11,7 @@ var timesMap = {
 }
 
 var tempPath = 'temp'
-var imagePath = 'images'
+var imagesPath = 'images'
 
 var commandLineArguments = process.argv.slice(2);
 commandLineArguments.forEach(function (arg) {
@@ -19,10 +19,10 @@ commandLineArguments.forEach(function (arg) {
   if (args.length > 1) {
     switch (args[0]) {
       case "-tempPath":
-        tempPath = 'temp' + args[1]
+        tempPath = args[1]
         break;
-      case "-imagePath":
-        imagePath = 'images' + args[1]
+      case "-imagesPath":
+        imagesPath = args[1]
         break;
     }
   }
@@ -35,12 +35,12 @@ jobs.process('slideshows', function (job, done) {
     var token = job.data.token;
     var songPath = job.data.songPath;
     console.log("processing token " + job.data.token)
-    facebook.getPhotos({token: token, imagePath: imagePath}).then(function () {
+    facebook.getPhotos({token: token, imagesPath: imagesPath}).then(function () {
       console.log("get photos complete")
       slideshow.create({
         track: "./audio/" + songPath,
         times: timesMap[songPath],
-        imagePath: imagePath,
+        imagesPath: imagesPath,
         tempPath: tempPath
       }).then(function () {
         console.log("slideshow complete")
