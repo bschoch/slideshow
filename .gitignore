@@ -4,3 +4,5 @@ Dockerfile
 docker-compose.yml
 .idea
 output.mkv
+output.mp4
+temp
