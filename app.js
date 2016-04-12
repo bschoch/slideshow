@@ -57,4 +57,11 @@ jobs.process('slideshows', function (job, done) {
     console.log("UNHANDLED_ERROR " + err)
     return done()
   }
+
+  process.on('uncaughtException', function (err) {
+    console.log("UNHANDLED_ERROR " + err);
+    return done()
+  })
 })
+
+
