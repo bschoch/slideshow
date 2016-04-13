@@ -1,7 +1,7 @@
 var spawn = require('child_process').spawn
 var spawnSync = require('child_process').spawnSync
 var q = require('q')
-var sync = false
+var sync = true
 
 exports.imageToVideo = imageToVideo
 
