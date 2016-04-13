@@ -48,23 +48,16 @@ function call(deferred, args, success) {
       deferred.reject([result.stdout ? result.stdout.toString() : '', result.stderr ? result.stderr.toString() : ''])
     }
   } else {
-    var stdout, stderr
     var command = spawn('ffmpeg', args)
-    if (command.stdout) {
-      command.stdout.on('data', function (data) {
-        stdout += data
-      })
-    }
-    if (command.stderr) {
-      command.stderr.on('data', function (data) {
-        stderr += data
-      })
-    }
+    command.on('error', function(err) {
+      console.log('ffmpeg err ' + err)
+      return deferred.reject(err)
+    })
     command.on('exit', function (code, signal) {
       if (signal) {
-        return deferred.reject([stdout, stderr].join('\n'))
+        return deferred.reject(signal)
       } else if (code !== 0) {
-        return deferred.reject([stdout, stderr].join('\n'))
+        return deferred.reject(code)
       } else {
         return deferred.resolve(success)
       }
