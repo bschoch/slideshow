@@ -6,3 +6,4 @@ docker-compose.yml
 output.mkv
 output.mp4
 temp
+.DS_store
