@@ -1,6 +1,6 @@
 var kue = require('kue')
 var jobs = kue.createQueue({
-  redis: 'redis://127.0.0.1:6379'
+  redis: 'redis://159.203.223.179:6379'
 });
 var facebook = require('./facebook.js')
 var slideshow = require('./slideshow.js')
