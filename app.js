@@ -1,7 +1,19 @@
 var kue = require('kue')
 var jobs = kue.createQueue({
-  redis: 'redis://159.203.223.179:6379'
-});
+  redis: {
+    host: '159.203.223.179',
+    options: {
+      socket_keepalive: true,
+      retry_strategy: function (options) {
+        console.log("DISCONNECTED " + options.times_connected + " times.", "ATTEMPT " + options.attempt)
+        // reconnect after
+        return 3000
+      }
+    }
+  }
+})
+
+global.jobs = jobs
 var facebook = require('./facebook.js')
 var slideshow = require('./slideshow.js')
 
@@ -30,12 +42,18 @@ commandLineArguments.forEach(function (arg) {
 })
 
 console.log("starting reading from queue")
-jobs.process('slideshows', function (job, done) {
-  var urls = job.data.urls;
-  var token = job.data.token;
-  var songPath = job.data.songPath;
+var complete = false
+var job
+var done
+jobs.process('slideshows', function (jobIn, doneIn) {
+  complete = false
+  job = jobIn
+  done = doneIn
+  var urls = job.data.urls
+  var token = job.data.token
+  var songPath = job.data.songPath
   console.log("processing token " + job.data.token)
-  return facebook.getPhotos({token: token, imagesPath: imagesPath}).then(function () {
+  facebook.getPhotos({token: token, imagesPath: imagesPath}).then(function () {
     console.log("get photos complete")
     return slideshow.create({
       track: "./audio/" + songPath,
@@ -44,15 +62,22 @@ jobs.process('slideshows', function (job, done) {
       tempPath: tempPath
     }).then(function () {
       console.log("slideshow complete")
-      return facebook.uploadVideo({outputFile: tempPath + '/output.mp4', token: job.data.token}).then(function (data) {
+      return facebook.uploadVideo({
+        outputFile: tempPath + '/output.mp4',
+        token: job.data.token
+      }).then(function (data) {
+        complete = true
         console.log("success " + job.data.token)
         return done()
       })
     })
-  }).fail(function (err) {
-    console.log("HANDLED_ERROR " + err)
-    return done();
   })
 })
 
-
+jobs.on('error', function (err) {
+  if (complete && job) {
+    console.log('job ' + job.data.token + 'completed with error ' + err)
+  } else {
+    console.log('UNHANDLED_ERROR ' + err)
+  }
+})
