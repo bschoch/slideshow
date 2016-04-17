@@ -29,6 +29,10 @@ commandLineArguments.forEach(function (arg) {
   }
 })
 
+setInterval(function() {
+  jobs.client.getKey("NULL")
+}, 30000)
+
 console.log("starting reading from queue")
 jobs.process('slideshows', function (job, done) {
   try {
