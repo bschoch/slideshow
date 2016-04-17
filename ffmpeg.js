@@ -41,12 +41,14 @@ function addAudioToVideo(videoPath, audioPath, destination) {
 function call(deferred, args, success) {
   console.log('ffmpeg ' + args.join(' '))
   if (sync) {
-    var result = spawnSync('ffmpeg', args)
-    if (result.status === 0) {
-      deferred.resolve(success)
-    } else {
-      deferred.reject([result.stdout ? result.stdout.toString() : '', result.stderr ? result.stderr.toString() : ''])
-    }
+    process.nextTick(function() {
+      var result = spawnSync('ffmpeg', args)
+      if (result.status === 0) {
+        deferred.resolve(success)
+      } else {
+        deferred.reject([result.stdout ? result.stdout.toString() : '', result.stderr ? result.stderr.toString() : ''])
+      }
+    })
   } else {
     var command = spawn('ffmpeg', args)
     command.on('error', function(err) {
