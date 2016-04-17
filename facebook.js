@@ -61,8 +61,7 @@ function downloadPhotos(urls, dirName) {
                     deferred.reject("error")
                 })
             } else {
-                console.log("ERROR")
-                return deferred.reject("ERROR")
+                return deferred.reject("error")
             }
         })
     })

@@ -41,8 +41,8 @@ function addAudioToVideo(videoPath, audioPath, destination) {
 function call(deferred, args, success) {
   console.log('ffmpeg ' + args.join(' '))
   if (sync) {
-    process.nextTick(function() {
-      var result = spawnSync('ffmpeg', args)
+    var result = spawnSync('ffmpeg', args)
+    process.nextTick(function () {
       if (result.status === 0) {
         deferred.resolve(success)
       } else {
@@ -51,8 +51,8 @@ function call(deferred, args, success) {
     })
   } else {
     var command = spawn('ffmpeg', args)
-    command.on('error', function(err) {
-      console.log('ffmpeg err ' + err)
+    command.on('error', function (err) {
+      console.log('ffmpeg err', err)
       return deferred.reject(err)
     })
     command.on('exit', function (code, signal) {
