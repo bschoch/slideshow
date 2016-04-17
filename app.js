@@ -1,7 +1,7 @@
 var kue = require('kue')
 var jobs = kue.createQueue({
   redis: {
-    host: '159.203.223.179',
+    host: '159.203.212.134',
     options: {
       socket_keepalive: true,
       retry_strategy: function (options) {
@@ -38,8 +38,6 @@ commandLineArguments.forEach(function (arg) {
     }
   }
 })
-
-jobs.watchStuckJobs()
 
 console.log("starting reading from queue")
 var errors
