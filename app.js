@@ -29,44 +29,30 @@ commandLineArguments.forEach(function (arg) {
   }
 })
 
-process.nextTick(function() {
-  setInterval(function () {
-    jobs.client.get("NULL", function (err, res) {
-      console.log(err)
-      console.log(res)
-    })
-  }, 20000)
-})
-
 console.log("starting reading from queue")
 jobs.process('slideshows', function (job, done) {
-  try {
-    var urls = job.data.urls;
-    var token = job.data.token;
-    var songPath = job.data.songPath;
-    console.log("processing token " + job.data.token)
-    facebook.getPhotos({token: token, imagesPath: imagesPath}).then(function () {
-      console.log("get photos complete")
-      slideshow.create({
-        track: "./audio/" + songPath,
-        times: timesMap[songPath],
-        imagesPath: imagesPath,
-        tempPath: tempPath
-      }).then(function () {
-        console.log("slideshow complete")
-        facebook.uploadVideo({outputFile: tempPath + '/output.mp4', token: job.data.token}).then(function (data) {
-          console.log("success " + job.data.token)
-          return done()
-        })
+  var urls = job.data.urls;
+  var token = job.data.token;
+  var songPath = job.data.songPath;
+  console.log("processing token " + job.data.token)
+  return facebook.getPhotos({token: token, imagesPath: imagesPath}).then(function () {
+    console.log("get photos complete")
+    return slideshow.create({
+      track: "./audio/" + songPath,
+      times: timesMap[songPath],
+      imagesPath: imagesPath,
+      tempPath: tempPath
+    }).then(function () {
+      console.log("slideshow complete")
+      return facebook.uploadVideo({outputFile: tempPath + '/output.mp4', token: job.data.token}).then(function (data) {
+        console.log("success " + job.data.token)
+        return done()
       })
-    }).fail(function (err) {
-      console.log("HANDLED_ERROR " + err)
-      return done();
     })
-  } catch (err) {
-    console.log("UNHANDLED_ERROR " + err)
-    return done()
-  }
+  }).fail(function (err) {
+    console.log("HANDLED_ERROR " + err)
+    return done();
+  })
 })
 
 

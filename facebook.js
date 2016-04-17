@@ -14,7 +14,7 @@ function getPhotos(options) {
     console.log("get photos begin")
     getAllPhotoUrls().then(function (urls) {
         console.log("get photos retrieved urls " + urls)
-        downloadPhotos(urls, options.imagesPath).then(function () {
+        return downloadPhotos(urls, options.imagesPath).then(function () {
             console.log("get photos urls downloaded")
             return deferred.resolve("success")
         })

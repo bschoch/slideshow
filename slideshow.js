@@ -54,15 +54,15 @@ exports.create = function (options) {
     var modifiedImages = new Date().getTime()
     console.log("modified images " + (modifiedImages - begin))
     console.log("slideshow creating video stills")
-    createVideoStills(times).then(function () {
+    return createVideoStills(times).then(function () {
       var createdVideoStills = new Date().getTime()
       console.log("created video stills " + (createdVideoStills - modifiedImages))
       console.log("slideshow concatenating video stills")
-      concatenateVideoStills().then(function () {
+      return concatenateVideoStills().then(function () {
         var concatenatedStills = new Date().getTime()
         console.log("concatenated video stills " + (concatenatedStills - createdVideoStills))
         console.log("slideshow adding audio track")
-        addAudioTrack(audioTrack).then(function () {
+        return addAudioTrack(audioTrack).then(function () {
           var addAudioTrack = new Date().getTime()
           console.log("added audio track " + (addAudioTrack - concatenatedStills))
           console.log("total video rendering time" + (addAudioTrack - begin))
