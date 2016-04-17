@@ -19,9 +19,7 @@ function getPhotos(options) {
             return deferred.resolve("success")
         })
     }).fail(function (err) {
-        deferred.reject("ERROR")
-        console.log("slideshow failed")
-        console.log(err)
+        return deferred.reject("ERROR")
     })
     return deferred.promise
 }
@@ -75,10 +73,13 @@ function getAllPhotoUrls() {
     var deferred = q.defer(), photoUrls = []
     getPhotoUrls("tagged").then(function (photos) {
         photoUrls = photoUrls.concat(photos)
-        getPhotoUrls("uploaded").then(function (photos) {
+        return getPhotoUrls("uploaded").then(function (photos) {
             photoUrls = photoUrls.concat(photos)
-            deferred.resolve(photoUrls)
+            return deferred.resolve(photoUrls)
         })
+    }).fail(function(err) {
+        console.log("ERROR getting photo urls", err)
+        return deferred.reject(err)
     })
     return deferred.promise
 }

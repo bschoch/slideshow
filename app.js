@@ -71,6 +71,9 @@ jobs.process('slideshows', function (jobIn, doneIn) {
         return done()
       })
     })
+  }).fail(function(err) {
+    console.log('slideshow errored')
+    return done(err)
   })
 })
 
