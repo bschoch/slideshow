@@ -9,7 +9,7 @@ var jobs = kue.createQueue({
       }
     }
   }
-})
+}).watchStuckJobs()
 
 global.jobs = jobs
 var facebook = require('./facebook.js')
@@ -38,6 +38,8 @@ commandLineArguments.forEach(function (arg) {
     }
   }
 })
+
+jobs.watchStuckJobs()
 
 console.log("starting reading from queue")
 var errors
