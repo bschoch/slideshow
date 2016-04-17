@@ -9,7 +9,8 @@ var jobs = kue.createQueue({
       }
     }
   }
-}).watchStuckJobs()
+})
+jobs.watchStuckJobs()
 
 global.jobs = jobs
 var facebook = require('./facebook.js')
