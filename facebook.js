@@ -45,6 +45,18 @@ function uploadVideo(options) {
     return deferred.promise
 }
 
+exports.upgradeToken = upgradeToken
+function upgradeToken(token) {
+  var deferred = q.defer()
+  FB.api('/oauth/access_token?grant_type=fb_exchange_token&client_id=' + process.env.VISAUDIO_FACEBOOK_APP_ID + '&client_secret=' + process.env.VISAUDIO_FACEBOOK_APP_SECRET + '&fb_exchange_token=' + token, {}, function(res) {
+    if (!res || res.error) {
+      return deferred.reject(!res ? "ERROR" : res.error)
+    }
+    return deferred.resolve(res.access_token)
+  })
+  return deferred.promise
+}
+
 function downloadPhotos(urls, dirName) {
     utilities.rmdir(dirName)
     fs.mkdirSync(dirName)
