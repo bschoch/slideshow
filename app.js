@@ -48,27 +48,25 @@ jobs.process('slideshows', function (job, done) {
   var token = job.data.token
   var songPath = job.data.songPath
   console.log("processing token " + job.data.token)
-  facebook.upgradeToken(token).then(function(token) {
-    return facebook.getPhotos({token: token, imagesPath: imagesPath}).then(function () {
-      console.log("get photos complete")
-      return slideshow.create({
-        track: "./audio/" + songPath,
-        times: timesMap[songPath],
-        imagesPath: imagesPath,
-        tempPath: tempPath
-      }).then(function () {
-        console.log("slideshow complete")
-        return facebook.uploadVideo({
-          outputFile: tempPath + '/output.mp4',
-          token: job.data.token
-        }).then(function (data) {
-          console.log("SLIDESHOW_SUCCESS", data.id)
-          console.log("NON_FATAL_ERRORS", errors)
-          return done()
-        })
+  return facebook.getPhotos({token: token, imagesPath: imagesPath}).then(function () {
+    console.log("get photos complete")
+    return slideshow.create({
+      track: "./audio/" + songPath,
+      times: timesMap[songPath],
+      imagesPath: imagesPath,
+      tempPath: tempPath
+    }).then(function () {
+      console.log("slideshow complete")
+      return facebook.uploadVideo({
+        outputFile: tempPath + '/output.mp4',
+        token: job.data.token
+      }).then(function (data) {
+        console.log("SLIDESHOW_SUCCESS", data.id)
+        console.log("NON_FATAL_ERRORS", errors)
+        return done()
       })
     })
-  }).fail(function(err) {
+  }).fail(function (err) {
     console.log("SLIDESHOW_ERROR", err)
     console.log("NON_FATAL_ERRORS", errors)
     return done(err)
