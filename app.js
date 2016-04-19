@@ -62,7 +62,7 @@ jobs.process('slideshows', function (job, done) {
           outputFile: tempPath + '/output.mp4',
           token: job.data.token
         }).then(function (data) {
-          console.log("SUCCESS", data.id)
+          console.log("SLIDESHOW_SUCCESS", data.id)
           console.log("NON_FATAL_ERRORS", errors)
           return done()
         })
@@ -70,11 +70,13 @@ jobs.process('slideshows', function (job, done) {
     })
   }).fail(function(err) {
     console.log("SLIDESHOW_ERROR", err)
+    console.log("NON_FATAL_ERRORS", errors)
     return done(err)
   })
 })
 
 jobs.on('error', function (err) { // listening to error is required to ignore them
+  console.log("ERROR", err)
   if (isNaN(errors[err])) {
     errors[err] = 1
   } else {
