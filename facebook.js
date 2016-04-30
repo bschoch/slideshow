@@ -66,7 +66,7 @@ function getUser(options) {
     if (!res || res.error) {
       return deferred.reject(res ? res.error : "ERROR_GET_USER")
     }
-    return deferred.resolve(res.data)
+    return deferred.resolve(res)
   })
   return deferred.promise
 }
