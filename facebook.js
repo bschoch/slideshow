@@ -31,7 +31,7 @@ function uploadVideo(options) {
   FBpost.setAccessToken(options.token)
   FBpost.api("/me/videos", 'POST', {
     source: '@' + './' + options.outputFile,
-    title: "visualize your life",
+    title: "visaudio.me",
     url: "visaudio.me",
     site_name: "visaudio"
   }, function (err, res) {
