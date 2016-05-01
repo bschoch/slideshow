@@ -62,7 +62,7 @@ exports.getUser = getUser
 function getUser(options) {
   var deferred = q.defer()
   FB.setAccessToken(options.token)
-  FB.api('/me', {}, function (res) {
+  FB.api('/me?fields=email,first_name,last_name,gender,name', {}, function (res) {
     if (!res || res.error) {
       return deferred.reject(res ? res.error : "ERROR_GET_USER")
     }
