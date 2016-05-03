@@ -149,7 +149,7 @@ function createVideoStills(times) {
           }
           time = seconds + '.' + time + milliseconds
           var imageName = imagesPath + '/' + (Math.floor(Math.random() * (imageNames.length - 1) + 1)) + '.jpg'
-          while (imageName == lastImageName) {
+          while (imageName == lastImageName && imageNames.length > 1) {
             imageName = imagesPath + '/' + (Math.floor(Math.random() * (imageNames.length - 1) + 1)) + '.jpg'
           }
           lastImageName = imageName
